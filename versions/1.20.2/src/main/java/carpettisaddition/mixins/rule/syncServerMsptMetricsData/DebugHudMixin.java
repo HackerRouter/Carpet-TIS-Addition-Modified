@@ -1,0 +1,128 @@
+/*
+ * This file is part of the Carpet TIS Addition project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2023  Fallen_Breath and contributors
+ *
+ * Carpet TIS Addition is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Carpet TIS Addition is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Carpet TIS Addition.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package carpettisaddition.mixins.rule.syncServerMsptMetricsData;
+
+import carpettisaddition.helpers.rule.syncServerMsptMetricsData.ServerMsptMetricsDataSyncer;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.components.debugchart.TpsDebugChart;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+//#if MC >= 26.1
+//$$ import net.minecraft.client.gui.GuiGraphicsExtractor;
+//#else
+import net.minecraft.client.gui.GuiGraphics;
+//#endif
+
+//#if MC >= 12005
+//$$ import net.minecraft.util.debugchart.LocalSampleLogger;
+//#endif
+
+/**
+ * mc1.14 ~ mc1.20.1: subproject 1.15.2 (main project)
+ * mc1.20.2+        : subproject 1.20.2        <--------
+ */
+@Mixin(DebugScreenOverlay.class)
+public abstract class DebugHudMixin
+{
+	@Shadow @Final private Font font;
+	@Shadow @Final private Minecraft minecraft;
+
+	//#if MC >= 12003
+	//$$ @Shadow @Final private TpsDebugChart tpsChart;
+	//#endif
+
+	//#if MC >= 12005
+	//$$ @Shadow @Final private LocalSampleLogger tickTimeLogger;
+	//#endif
+
+	@Inject(
+			//#if MC >= 26.1
+			//$$ method = "extractRenderState",
+			//#elseif MC >= 12102
+			//$$ method = "render",
+			//#else
+			method = "method_51746",  // lambda method in render()
+			//#endif
+			at = @At(
+					value = "INVOKE",
+					//#if MC >= 12005
+					//$$ target = "Lnet/minecraft/util/debugchart/LocalSampleLogger;size()I"
+					//#else
+					target = "Lnet/minecraft/client/Minecraft;getSingleplayerServer()Lnet/minecraft/client/server/IntegratedServer;"
+					//#endif
+			)
+	)
+	private void syncServerMsptMetricsData_drawIfPossible(
+			//#if MC >= 26.1
+			//$$ GuiGraphicsExtractor drawContext,
+			//#else
+			GuiGraphics drawContext,
+			//#endif
+			CallbackInfo ci,
+			@Local(ordinal = 0) int windowWidth,
+			@Local(ordinal = 1) int centerX
+	)
+	{
+		boolean shouldVanillaChartDraw =
+				//#if MC >= 12005
+				//$$ this.tickTimeLogger.size() > 0;
+				//#else
+				this.minecraft.getSingleplayerServer() != null;
+				//#endif
+		if (!shouldVanillaChartDraw)
+		{
+			if (ServerMsptMetricsDataSyncer.getInstance().isServerSupportOk())
+			{
+				var data = ServerMsptMetricsDataSyncer.getInstance().getMetricsData();
+				//#if MC >= 12005
+				//$$ if (data.size() <= 0)
+				//$$ {
+				//$$ 	return;
+				//$$ }
+				//#endif
+
+				var chart = new TpsDebugChart(
+						this.font, data
+						//#if MC >= 12003
+						//$$ , ((TickChartAccessor)this.tpsChart).getMillisPerTickSupplier()
+						//#endif
+				);
+
+				// vanilla copy
+				int width = chart.getWidth(centerX);
+
+				//#if MC >= 21.6
+				//$$ chart.extractRenderState(drawContext, windowWidth - width, width);
+				//#else
+				chart.drawChart(drawContext, windowWidth - width, width);
+				//#endif
+			}
+		}
+	}
+}

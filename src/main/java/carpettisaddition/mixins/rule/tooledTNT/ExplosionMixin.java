@@ -1,0 +1,76 @@
+/*
+ * This file is part of the Carpet TIS Addition project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2023  Fallen_Breath and contributors
+ *
+ * Carpet TIS Addition is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Carpet TIS Addition is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Carpet TIS Addition.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package carpettisaddition.mixins.rule.tooledTNT;
+
+import carpettisaddition.helpers.rule.tooledTNT.TooledTNTHelper;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Explosion;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+
+//#if MC >= 12003
+//$$ import com.llamalad7.mixinextras.sugar.Local;
+//$$ import net.minecraft.world.level.block.state.BlockBehaviour;
+//#endif
+
+@Mixin(
+		//#if MC >= 12003
+		//$$ BlockBehaviour.class
+		//#else
+		Explosion.class
+		//#endif
+)
+public abstract class ExplosionMixin
+{
+	/**
+	 * See {@link OptimizedExplosionMixin} for mixin at carpet in for this rule
+	 */
+	@ModifyExpressionValue(
+			//#if MC >= 12003
+			//$$ method = "onExplosionHit",
+			//#else
+			method = "finalizeExplosion",
+			//#endif
+			at = @At(
+					value = "FIELD",
+					target = "Lnet/minecraft/world/item/ItemStack;EMPTY:Lnet/minecraft/world/item/ItemStack;"
+			),
+			//#if MC >= 11900
+			//$$ allow = 2
+			//#else
+			allow = 1
+			//#endif
+	)
+	private ItemStack useTheToolInYourHand(
+			ItemStack itemStack
+			//#if MC >= 12003
+			//$$ , @Local(argsOnly = true) Explosion explosion
+			//#endif
+	)
+	{
+		//#if MC < 12003
+		Explosion explosion = (Explosion)(Object)this;
+		//#endif
+
+		return TooledTNTHelper.getMainHandItemOfCausingEntity(explosion).orElse(itemStack);
+	}
+}

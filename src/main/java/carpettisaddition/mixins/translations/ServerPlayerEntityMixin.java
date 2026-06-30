@@ -1,0 +1,107 @@
+/*
+ * This file is part of the Carpet TIS Addition project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2023  Fallen_Breath and contributors
+ *
+ * Carpet TIS Addition is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Carpet TIS Addition is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Carpet TIS Addition.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package carpettisaddition.mixins.translations;
+
+import carpettisaddition.translations.ServerPlayerEntityWithClientLanguage;
+import carpettisaddition.translations.TISAdditionTranslations;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.BaseComponent;
+import net.minecraft.network.chat.Component;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+//#if MC >= 12002
+//$$ import net.minecraft.server.level.ClientInformation;
+//#else
+import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+//#endif
+
+@Mixin(ServerPlayer.class)
+public abstract class ServerPlayerEntityMixin implements ServerPlayerEntityWithClientLanguage
+{
+	@Unique
+	private String clientLanguage$TISCM = "en_US";
+
+	@Inject(
+			method = "updateOptions",
+			at = @At("HEAD")
+	)
+	private void recordClientLanguage(
+			//#if MC >= 12002
+			//$$ ClientInformation settings,
+			//#else
+			ServerboundClientInformationPacket packet,
+			//#endif
+			CallbackInfo ci)
+	{
+		this.clientLanguage$TISCM =
+				//#if MC >= 12002
+				//$$ settings.language();
+				//#elseif MC >= 11800
+				//$$ packet.language();
+				//#else
+				((ClientSettingsC2SPacketAccessor)packet).getLanguage$TISCM();
+				//#endif
+	}
+
+	@Override
+	public String getClientLanguage$TISCM()
+	{
+		return this.clientLanguage$TISCM;
+	}
+
+	@Override
+	public void setClientLanguage$TISCM(String clientLanguage)
+	{
+		this.clientLanguage$TISCM = clientLanguage;
+	}
+
+	/**
+	 * This handle all TISCM translation on chat messages
+	 */
+	@ModifyVariable(
+			method = {
+					//#if MC >= 11901
+					//$$ "sendSystemMessage(Lnet/minecraft/network/chat/Component;Z)V",
+					//#elseif MC >= 11600
+					//$$ "displayClientMessage",
+					//$$ "sendMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V",
+					//#else
+					"displayClientMessage",
+					"sendMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;)V",
+					//#endif
+			},
+			at = @At("HEAD"),
+			argsOnly = true
+	)
+	private Component applyTISCarpetTranslationToChatMessage(Component message)
+	{
+		if (message instanceof BaseComponent)
+		{
+			message = TISAdditionTranslations.translate((BaseComponent)message, (ServerPlayer)(Object)this);
+		}
+		return message;
+	}
+}

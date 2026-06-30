@@ -1,0 +1,98 @@
+/*
+ * This file is part of the Carpet TIS Addition project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2023  Fallen_Breath and contributors
+ *
+ * Carpet TIS Addition is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Carpet TIS Addition is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Carpet TIS Addition.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package carpettisaddition.mixins.logger.microtiming.events.tiletick;
+
+import carpettisaddition.logging.loggers.microtiming.MicroTimingLoggerManager;
+import carpettisaddition.logging.loggers.microtiming.enums.EventType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.TickNextTickData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+/**
+ * Tile Tick
+ * for MC 1.18+, executing tile tick stuffs are mixined in TileTickListMixin
+ */
+@Mixin(ServerLevel.class)
+public abstract class ServerWorldMixin
+{
+	@Inject(
+			method = "tickBlock",
+			at = @At(
+					value = "INVOKE",
+					//#if MC >= 11500
+					target = "Lnet/minecraft/world/level/block/state/BlockState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"
+					//#else
+					//$$ target = "Lnet/minecraft/world/level/block/state/BlockState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"
+					//#endif
+			)
+	)
+	private void preExecuteBlockTileTickEvent(TickNextTickData<Block> event, CallbackInfo ci)
+	{
+		MicroTimingLoggerManager.onExecuteTileTickEvent((ServerLevel)(Object)this, event, EventType.ACTION_START);
+	}
+
+	@Inject(
+			method = "tickBlock",
+			at = @At(
+					value = "INVOKE",
+					//#if MC >= 11500
+					target = "Lnet/minecraft/world/level/block/state/BlockState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V",
+					//#else
+					//$$ target = "Lnet/minecraft/world/level/block/state/BlockState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V",
+					//#endif
+					shift = At.Shift.AFTER
+			)
+	)
+	private void postExecuteBlockTileTickEvent(TickNextTickData<Block> event, CallbackInfo ci)
+	{
+		MicroTimingLoggerManager.onExecuteTileTickEvent((ServerLevel)(Object)this, event, EventType.ACTION_END);
+	}
+
+	@Inject(
+			method = "tickLiquid",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"
+			)
+	)
+	private void preExecuteFluidTileTickEvent(TickNextTickData<Fluid> event, CallbackInfo ci)
+	{
+		MicroTimingLoggerManager.onExecuteTileTickEvent((ServerLevel)(Object)this, event, EventType.ACTION_START);
+	}
+
+	@Inject(
+			method = "tickLiquid",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V",
+					shift = At.Shift.AFTER
+			)
+	)
+	private void postExecuteFluidTileTickEvent(TickNextTickData<Fluid> event, CallbackInfo ci)
+	{
+		MicroTimingLoggerManager.onExecuteTileTickEvent((ServerLevel)(Object)this, event, EventType.ACTION_END);
+	}
+}

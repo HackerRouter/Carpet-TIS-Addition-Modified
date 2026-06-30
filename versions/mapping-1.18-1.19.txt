@@ -1,0 +1,11 @@
+carpet.fakes.ServerPlayerEntityInterface carpet.fakes.ServerPlayerInterface
+carpet.settings.ParsedRule carpet.api.settings.CarpetRule
+carpet.settings.ParsedRule get() carpet.api.settings.CarpetRule value()
+carpet.settings.ParsedRule validators realValidators
+carpet.settings.RuleCategory carpet.api.settings.RuleCategory
+carpet.settings.SettingsManager carpet.api.settings.SettingsManager
+carpet.settings.Validator carpet.api.settings.Validator
+
+net.minecraft.core.Registry net.minecraft.core.registries.BuiltInRegistries
+net.minecraft.network.chat.BaseComponent net.minecraft.network.chat.MutableComponent
+net.minecraft.world.level.biome.Biome getPrecipitation() getPrecipitationAt()

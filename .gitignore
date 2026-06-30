@@ -1,0 +1,31 @@
+# gradle
+
+.gradle/
+build/
+out/
+classes/
+logs/
+
+# idea
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# fabric
+
+run/
+
+# curseforge api cheatsheet
+
+/.github/workflows/gameversions.json
+/.github/workflows/gameversiontype.json

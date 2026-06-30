@@ -1,0 +1,77 @@
+/*
+ * This file is part of the Carpet TIS Addition project, licensed under the
+ * GNU Lesser General Public License v3.0
+ *
+ * Copyright (C) 2023  Fallen_Breath and contributors
+ *
+ * Carpet TIS Addition is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Carpet TIS Addition is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Carpet TIS Addition.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package carpettisaddition.mixins.command.refresh;
+
+import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.ChunkMap;
+import net.minecraft.world.level.ChunkPos;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+
+//#if MC >= 11800
+//$$ import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
+//$$ import org.apache.commons.lang3.mutable.MutableObject;
+//#else
+import net.minecraft.network.protocol.Packet;
+//#endif
+
+@Mixin(ChunkMap.class)
+public interface ThreadedAnvilChunkStorageAccessor
+{
+	@Accessor("updatingChunkMap")
+	Long2ObjectLinkedOpenHashMap<ChunkHolder> getCurrentChunkHolders();
+
+	@Accessor("viewDistance")
+	int getWatchDistance();
+
+	//#if MC >= 11800 && MC < 12002
+	//$$ // isChunkWithinEuclideanDistanceRange or whatever
+	//$$ @Invoker("isChunkInRange")
+	//$$ static boolean invokeIsChunkWithinEuclideanDistanceRange(int chunkX, int chunkZ, int playerSectionX, int playerSectionZ, int distance)
+	//$$ {
+	//$$ 	return false;
+	//$$ }
+	//#endif
+
+	//#if MC < 11800
+	@Invoker("checkerboardDistance")
+	static int invokeGetChebyshevDistance(ChunkPos pos, ServerPlayer player, boolean useCameraPosition)
+	{
+		return 0;
+	}
+	//#endif
+
+	//#if MC < 12002
+	@Invoker("updateChunkTracking")
+	void invokeSendWatchPackets(
+			ServerPlayer player, ChunkPos pos,
+			//#if MC >= 11800
+			//$$ MutableObject<ClientboundLevelChunkWithLightPacket> mutableObject,
+			//#else
+			Packet<?>[] packets,
+			//#endif
+			boolean withinMaxWatchDistance, boolean withinViewDistance
+	);
+	//#endif
+}

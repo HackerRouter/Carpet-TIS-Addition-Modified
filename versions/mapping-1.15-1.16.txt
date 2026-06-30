@@ -1,0 +1,3 @@
+carpet.script.utils.ShapeDispatcher$Text carpet.script.utils.ShapeDispatcher$DisplayedText
+
+net.minecraft.world.entity.monster.SharedMonsterAttributes net.minecraft.world.entity.ai.attributes.Attributes

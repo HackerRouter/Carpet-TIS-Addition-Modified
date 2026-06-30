@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+
+  "name": "${name}",
+  "description": "More useful tools and interesting features",
+  "authors": [
+    "Fallen_Breath ..."
+  ],
+  "contact": {
+    "homepage": "https://carpet.tis.world",
+    "issues": "https://github.com/TISUnion/Carpet-TIS-Addition/issues",
+    "sources": "https://github.com/TISUnion/Carpet-TIS-Addition"
+  },
+  "license": "LGPL-3.0",
+
+  "icon": "assets/carpettisaddition/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "preLaunch": [
+      "carpettisaddition.CarpetTISAdditionPreLaunch"
+    ],
+    "main": [
+      "carpettisaddition.CarpetTISAdditionMod"
+    ]
+  },
+  "mixins": [
+    "carpet-tis-addition.mixins.json"
+  ],
+
+  "accessWidener": "carpet-tis-addition.accesswidener",
+  "breaks": {
+    "lithium": "${lithium_confliction}"
+  },
+  "depends": {
+    "fabricloader": ">=0.14.25",
+    "carpet": "${carpet_dependency}",
+    "minecraft": "${minecraft_dependency}",
+    "mixinextras": ">=0.3.0"
+  },
+  "custom": {
+    "modmenu:parent": "carpet"
+  }
+}
