@@ -1,4 +1,16 @@
-# Carpet TIS Addition
+# Carpet TIS Addition 26.1.1 Modified
+
+## COMMANDS
+
+`/carpet countOverflowSimulator` for [NSEE/AIOOBE suppressor](https://www.youtube.com/watch?v=_bdWrVEIvlM)
+
+`/carpet survivalPlayersLoadChunks`
+
+`/log autoSave all`
+
+`/manipulate server tick_count <add/set/show> <value>`
+
+------
 
 [![License](https://img.shields.io/github/license/TISUnion/Carpet-TIS-Addition.svg)](http://www.gnu.org/licenses/lgpl-3.0.html)
 [![Issues](https://img.shields.io/github/issues/TISUnion/Carpet-TIS-Addition.svg)](https://github.com/TISUnion/Carpet-TIS-Addition/issues)
