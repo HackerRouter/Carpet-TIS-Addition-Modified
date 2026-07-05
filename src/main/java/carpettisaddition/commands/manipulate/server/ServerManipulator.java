@@ -24,6 +24,7 @@ import carpettisaddition.commands.CommandTreeContext;
 import carpettisaddition.commands.manipulate.AbstractManipulator;
 import carpettisaddition.logging.loggers.entityIdCounter.EntityIdCounterUtils;
 import carpettisaddition.mixins.command.info.server.EntityAccessor;
+import carpettisaddition.mixins.command.manipulate.server.MinecraftServerAccessor;
 import carpettisaddition.utils.Messenger;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.BaseComponent;
@@ -66,6 +67,23 @@ public class ServerManipulator extends AbstractManipulator
 				then(literal("add").
 						then(argument("delta", integer()).
 								executes(c -> addEntityIdCounter(c.getSource(), getInteger(c, "delta")))
+						)
+				)
+		);
+
+		context.node.then(literal("tick_count").
+				executes(c -> showTickCount(c.getSource())).
+				then(literal("show").
+						executes(c -> showTickCount(c.getSource()))
+				).
+				then(literal("set").
+						then(argument("value", integer(Integer.MIN_VALUE, Integer.MAX_VALUE)).
+								executes(c -> setTickCount(c.getSource(), getInteger(c, "value")))
+						)
+				).
+				then(literal("add").
+						then(argument("delta", integer()).
+								executes(c -> addTickCount(c.getSource(), getInteger(c, "delta")))
 						)
 				)
 		);
@@ -115,6 +133,49 @@ public class ServerManipulator extends AbstractManipulator
 	{
 		int value = entity.getId();
 		Messenger.tell(source, tr("entity_id_counter.query", Messenger.entity(entity), this.prettyEidCounter(value)));
+		return 0;
+	}
+
+	private static MinecraftServerAccessor getServerAccessor(CommandSourceStack source)
+	{
+		return (MinecraftServerAccessor) source.getServer();
+	}
+
+	private BaseComponent prettyTickCount(int value)
+	{
+		double overflowToNegativePercent = ((double) value - Integer.MIN_VALUE) / ((double) Integer.MAX_VALUE - Integer.MIN_VALUE) * 100.0;
+		double overflowTo0Percent = ((double) value + Integer.MAX_VALUE + 1) / ((double) Integer.MAX_VALUE - Integer.MIN_VALUE + 1) * 100.0;
+		return Messenger.hover(
+				Messenger.s(value),
+				Messenger.c(
+						tr("tick_count.progress_of_overflow_to_negative", String.format("%.4f%%", overflowToNegativePercent)),
+						Messenger.newLine(),
+						tr("tick_count.progress_of_overflow_to_0", String.format("%.4f%%", overflowTo0Percent))
+				)
+		);
+	}
+
+	private int showTickCount(CommandSourceStack source)
+	{
+		int value = getServerAccessor(source).getTickCount$TISCM();
+		Messenger.tell(source, tr("tick_count.show", this.prettyTickCount(value)));
+		return 0;
+	}
+
+	private int setTickCount(CommandSourceStack source, int value)
+	{
+		getServerAccessor(source).setTickCount$TISCM(value);
+		Messenger.tell(source, tr("tick_count.set", this.prettyTickCount(value)));
+		return 0;
+	}
+
+	private int addTickCount(CommandSourceStack source, int delta)
+	{
+		MinecraftServerAccessor server = getServerAccessor(source);
+		int oldValue = server.getTickCount$TISCM();
+		int newValue = oldValue + delta;
+		server.setTickCount$TISCM(newValue);
+		Messenger.tell(source, tr("tick_count.add", delta, this.prettyTickCount(newValue)));
 		return 0;
 	}
 }

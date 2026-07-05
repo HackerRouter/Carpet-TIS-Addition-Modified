@@ -152,6 +152,11 @@ public class CarpetTISAdditionSettings
 	@Rule(categories = {TIS, COMMAND, TISCM_PROTOCOL})
 	public static String commandSpeedTest = "false";
 
+	//#if MC >= 1.19.0
+	//$$ @Rule(categories = {TIS, CREATIVE})
+	//$$ public static boolean countOverflowSimulator = false;
+	//#endif
+
 	@Rule(categories = {TIS, CREATIVE})
 	public static boolean creativeInstantTame = false;
 
@@ -163,6 +168,9 @@ public class CarpetTISAdditionSettings
 
 	@Rule(categories = {TIS, CREATIVE})
 	public static boolean creativeOpenContainerForcibly = false;
+
+	@Rule(categories = {TIS, SURVIVAL, FEATURE})
+	public static boolean survivalPlayersLoadChunks = true;
 
 	@Rule(categories = {TIS, CLIENT})
 	public static boolean debugNbtQueryNoPermission = false;

@@ -51,6 +51,10 @@ carpettisaddition:
       message: 无效的记录器开关规则值
 
   logger:
+    autoSave:
+      triggered: 自动保存已触发
+      completed: 自动保存已完成
+      chunk_saved: '区块 [%1$s, %2$s] 已保存 (%3$s)'
     commandBlock:
       executed: '%1$s执行了%2$s'
       remove_executor: 点击以删除%1$s
@@ -373,6 +377,12 @@ carpettisaddition:
           tile_tick: 已对%1$s个方块执行了计划刻
           precipitation_tick: 已对%1$s个方块执行了降水刻
       chunk:
+        save_cooldown:
+          query:
+            no_cooldown: '区块 [%1$s, %2$s] (%3$s) 没有保存冷却'
+            has_cooldown: '区块 [%1$s, %2$s] (%4$s) 保存冷却剩余: %3$s'
+          reset: '区块 [%1$s, %2$s] (%3$s) 的保存冷却已重置'
+          set: '区块 [%1$s, %2$s] (%4$s) 的保存冷却已设置为从现在起 %3$sms'
         help:
           danger_notice: '[注意] 区块操纵命令无法撤回，请在操作前备份，三思而后行'
           root: |-
@@ -458,6 +468,12 @@ carpettisaddition:
           show: '当前实体ID计数器为%1$s'
           query: '实体%1$s的ID为%2$s'
           progress_of_overflow_to_negative: '溢出至负数的进度: %1$s'
+        tick_count:
+          set: 已将服务器tick计数器设置为 %1$s
+          add: '已将服务器tick计数器增加%1$s，当前值为%2$s'
+          show: '当前服务器tick计数器为%1$s'
+          progress_of_overflow_to_negative: '溢出至负数的进度: %1$s'
+          progress_of_overflow_to_0: '溢出至0的进度: %1$s'
           progress_of_overflow_to_0: '溢出至0的进度: %1$s'
     player:
       action:
@@ -917,6 +933,12 @@ carpettisaddition:
         desc: 启用/speedtest命令用于网络速度测试
         extra:
           '0': 可以使用选项speedTestCommandMaxTestSize来调整最大允许的测试大小
+      countOverflowSimulator:
+        name: count溢出模拟器
+        desc: 绿宝石矿石上方的激活/充能铁轨可模拟count溢出更新抑制器
+        extra:
+          '0': 在绿宝石矿石上已亮起的激活/充能铁轨将要熄灭时，将当前更新链的count计数器设置为Integer.MAX_VALUE，触发count溢出并引发StackOverflowError
+          '1': 触发方块：绿宝石矿石。铁轨的setBlock调用正常执行；溢出导致的StackOverflowError发生在后续的addAndRun调用中
       creativeInstantTame:
         name: 创造模式瞬间驯服动物
         desc: 让创造模式的玩家可以瞬间驯服各种动物
@@ -1434,6 +1456,11 @@ carpettisaddition:
         desc: 自定义结构方块边界的渲染距离
         extra:
           '0': 需要在客户端中生效以获得效果
+      survivalPlayersLoadChunks:
+        name: 生存玩家加载区块
+        desc: 生存模式玩家加载区块，或者不加载！就像旁观者一样！
+        extra:
+          '0': 开关行为与玩家处于旁观模式并切换游戏规则spectatorsGenerateChunks完全一致
       synchronizedLightThread:
         name: 同步光照线程
         desc: 将光照线程与主线程同步

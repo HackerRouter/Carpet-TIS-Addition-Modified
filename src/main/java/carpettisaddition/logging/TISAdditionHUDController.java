@@ -22,6 +22,7 @@ package carpettisaddition.logging;
 
 import carpet.logging.LoggerRegistry;
 import carpettisaddition.logging.loggers.AbstractHUDLogger;
+import carpettisaddition.logging.loggers.autosave.AutoSaveHUDLogger;
 import carpettisaddition.logging.loggers.entityIdCounter.EntityIdCounterHUDLogger;
 import carpettisaddition.logging.loggers.lifetime.LifeTimeHUDLogger;
 import carpettisaddition.logging.loggers.lightqueue.LightQueueHUDLogger;
@@ -36,6 +37,7 @@ public class TISAdditionHUDController
 {
 	public static void updateHUD(MinecraftServer server)
 	{
+		doHudLogging(TISAdditionLoggerRegistry.__autoSave, AutoSaveHUDLogger.NAME, AutoSaveHUDLogger.getInstance());
 		doHudLogging(TISAdditionLoggerRegistry.__entityIdCounter, EntityIdCounterHUDLogger.NAME, EntityIdCounterHUDLogger.getInstance());
 		doHudLogging(TISAdditionLoggerRegistry.__lightQueue, LightQueueHUDLogger.NAME, LightQueueHUDLogger.getInstance());
 		doHudLogging(TISAdditionLoggerRegistry.__lifetime, LifeTimeHUDLogger.NAME, LifeTimeHUDLogger.getInstance());

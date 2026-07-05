@@ -51,6 +51,10 @@ carpettisaddition:
       message: Invalid value for a logger switch rule
 
   logger:
+    autoSave:
+      triggered: AutoSave triggered
+      completed: AutoSave completed
+      chunk_saved: 'Chunk [%1$s, %2$s] saved in %3$s'
     commandBlock:
       executed: '%1$s executed %2$s'
       remove_executor: Click to remove %1$s
@@ -373,6 +377,12 @@ carpettisaddition:
           tile_tick: Executed %1$s random ticks
           precipitation_tick: Executed %1$s precipitation tick
       chunk:
+        save_cooldown:
+          query:
+            no_cooldown: 'Chunk [%1$s, %2$s] in %3$s has no save cooldown'
+            has_cooldown: 'Chunk [%1$s, %2$s] in %4$s save cooldown remaining: %3$s'
+          reset: 'Chunk [%1$s, %2$s] in %3$s save cooldown has been reset'
+          set: 'Chunk [%1$s, %2$s] in %4$s save cooldown set to %3$sms from now'
         help:
           danger_notice: '[NOTICE] Chunk manipulations cannot be undone. Please back up and think twice before execute'
           root: |-
@@ -458,6 +468,12 @@ carpettisaddition:
           show: 'Current entity ID counter value: %1$s'
           query: 'Entity ID of %1$s is %2$s'
           progress_of_overflow_to_negative: 'Progress of overflow to negative: %1$s'
+        tick_count:
+          set: Set server tick counter to %1$s
+          add: 'Added %1$s to server tick counter, current value: %2$s'
+          show: 'Current server tick counter value: %1$s'
+          progress_of_overflow_to_negative: 'Progress of overflow to negative: %1$s'
+          progress_of_overflow_to_0: 'Progress of overflow to 0: %1$s'
           progress_of_overflow_to_0: 'Progress of overflow to 0: %1$s'
     player:
       action:
@@ -917,6 +933,12 @@ carpettisaddition:
         desc: Enables /speedtest command for network speed test
         extra:
           '0': You can change the maximum allowed test size with rule speedTestCommandMaxTestSize
+      countOverflowSimulator:
+        name: countOverflowSimulator
+        desc: Activator / Powered rail on an emerald ore simulates a count overflow update suppressor
+        extra:
+          '0': Right before a powered activator / powered rail on an emerald ore sets its powered state to false, set the updater count to Integer.MAX_VALUE to trigger count overflow and cause a StackOverflowError
+          '1': 'Trigger block: emerald ore. The rail''s setBlock call proceeds normally; the overflow-induced StackOverflowError occurs in the subsequent addAndRun call'
       creativeInstantTame:
         name: creativeInstantTame
         desc: Let create player tame animals instantly
@@ -1434,6 +1456,11 @@ carpettisaddition:
         desc: Customizable Structure Block outline render distance
         extra:
           '0': Required on client to work properly
+      survivalPlayersLoadChunks:
+        name: survivalPlayersLoadChunks
+        desc: Survival players load chunks, or they don't! Just like spectators!
+        extra:
+          '0': Toggling behaves exactly as if the player is in spectator mode and toggling the gamerule spectatorsGenerateChunks
       synchronizedLightThread:
         name: synchronizedLightThread
         desc: Synchronize lighting thread with the server thread
